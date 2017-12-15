@@ -1,7 +1,10 @@
 import React from "react";
 import ReactDOM from "react-dom";
+import { connect } from "react-redux";
+import * as actions from "./actions";
 import "./App.css";
 import ActionCable from "actioncable";
+import withAuth from "./hocs/withAuth";
 
 import Message from "./Message.js";
 
@@ -10,7 +13,7 @@ class Chatroom extends React.Component {
     super(props);
     this.subscribeChannel();
     this.state = {
-      username: "Ramy",
+      username: this.props.username,
       chats: [
         {
           username: "Kevin Hsu",
@@ -54,21 +57,23 @@ class Chatroom extends React.Component {
     e.preventDefault();
 
     let content = ReactDOM.findDOMNode(this.refs.msg).value;
-    let username = this.state.username;
-    let message = {
-      content,
-      username
-    };
+    if (content !== "") {
+      let username = this.props.username;
+      let message = {
+        content,
+        username
+      };
 
-    fetch("http://localhost:3000/messages", {
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json"
-      },
-      method: "POST",
-      body: JSON.stringify(message)
-    }).then(res => console.log(res));
-    this.clearMessage();
+      fetch("http://localhost:3000/messages", {
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json"
+        },
+        method: "POST",
+        body: JSON.stringify(message)
+      }).then(res => console.log(res));
+      this.clearMessage();
+    }
   }
 
   clearMessage() {
@@ -78,12 +83,15 @@ class Chatroom extends React.Component {
   render() {
     const username = this.state.username;
     const { chats } = this.state;
+    const chatsonpage = chats.map(chat => (
+      <Message chat={chat} user={username} />
+    ));
 
     return (
       <div className="chatroom">
         <h3>Gravim8</h3>
         <ul className="chats" ref="chats">
-          {chats.map(chat => <Message chat={chat} user={username} />)}
+          {chatsonpage}
         </ul>
         <form className="input" onSubmit={e => this.submitMessage(e)}>
           <input type="text" ref="msg" />
@@ -94,4 +102,8 @@ class Chatroom extends React.Component {
   }
 }
 
-export default Chatroom;
+const mapStateToProps = state => ({
+  username: state.auth.currentUser.username
+});
+
+export default withAuth(connect(mapStateToProps, actions)(Chatroom));
