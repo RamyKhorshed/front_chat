@@ -32,7 +32,11 @@ class Chatroom extends React.Component {
         this.setState({
           chats: [
             ...this.state.chats,
-            { username: data.username, content: data.content }
+            {
+              username: data.username,
+              content: data.content,
+              messagescore: data.messagescore
+            }
           ]
         });
       }
