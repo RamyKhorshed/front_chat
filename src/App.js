@@ -2,7 +2,9 @@ import React, { Component } from "react";
 import { Link, Switch, Route } from "react-router-dom";
 import { connect } from "react-redux";
 import Login from "./Login";
+import Chatlist from "./Chatlist";
 import Chatroom from "./Chatroom";
+import withAuth from "./hocs/withAuth";
 import * as actions from "./actions";
 import { Input, Menu, Button } from "semantic-ui-react";
 
@@ -32,16 +34,21 @@ class App extends Component {
               )}
             </Menu.Item>
             <Menu.Item>
-              <Link to="/chat">
-                <Button>Go to Chat</Button>
-              </Link>
+              {this.props.loggedIn ? (
+                <Link to={"/chatroom/" + this.props.username}>
+                  <Button>Go to Chat</Button>
+                </Link>
+              ) : null}
             </Menu.Item>
           </Menu.Menu>
         </Menu>
         <div className="App">
           <Switch>
             <Route path="/login" component={Login} />
-            <Route path="/chat" component={Chatroom} />
+            <Route
+              path={"/chatroom/" + this.props.username}
+              component={Chatlist}
+            />
           </Switch>
         </div>
       </div>
@@ -50,7 +57,8 @@ class App extends Component {
 }
 
 const mapStateToProps = state => ({
-  loggedIn: !!state.auth.currentUser.id
+  loggedIn: !!state.auth.currentUser.id,
+  username: state.auth.currentUser.username
 });
 
 export default connect(mapStateToProps, actions)(App);

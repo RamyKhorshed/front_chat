@@ -4,6 +4,7 @@ import * as types from "./types";
 export const fetchUser = () => dispatch => {
   dispatch({ type: types.ASYNC_START });
   adapter.auth.getCurrentUser().then(user => {
+    console.log(user);
     dispatch({ type: types.SET_CURRENT_USER, user });
   });
 };
@@ -15,7 +16,7 @@ export const loginUser = (username, password, history) => dispatch => {
   adapter.auth.login({ username, password }).then(user => {
     localStorage.setItem("token", user.jwt);
     dispatch({ type: types.SET_CURRENT_USER, user });
-    history.push("/chat");
+    history.push("/chatroom/" + username);
   });
 };
 

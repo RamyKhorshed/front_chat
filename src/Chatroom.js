@@ -11,39 +11,83 @@ import Message from "./Message.js";
 class Chatroom extends React.Component {
   constructor(props) {
     super(props);
-    this.subscribeChannel();
+
     this.state = {
       username: this.props.username,
+      chat_key: 1,
       chats: [
         {
           username: "Kevin Hsu",
           content: <p>Hello World!</p>,
           img: "http://i.imgur.com/Tj5DGiO.jpg"
         }
-      ]
+      ],
+      channelCable: {}
     };
     this.submitMessage = this.submitMessage.bind(this);
   }
 
-  subscribeChannel() {
+  subscribeChannel = key => {
     const cable = ActionCable.createConsumer("ws://localhost:3000/cable");
-    cable.subscriptions.create("RoomChannel", {
-      received: data => {
-        this.setState({
-          chats: [
-            ...this.state.chats,
-            {
-              username: data.username,
-              content: data.content,
-              messagescore: data.messagescore
-            }
-          ]
-        });
+    const channelSubscription = cable.subscriptions.create(
+      { channel: "RoomChannel", chat_key: key },
+      {
+        received: data => {
+          this.setState({
+            chats: [
+              ...this.state.chats,
+              {
+                username: data.username,
+                content: data.content,
+                messagescore: data.messagescore
+              }
+            ]
+          });
+        }
       }
+    );
+    this.setState({
+      channelCable: channelSubscription
     });
-  }
+  };
+
+  getChat = (id, friend_id) => {
+    let current_chat = friend_id;
+    let url =
+      "http://localhost:3000/api/v1/chats/" + id + "/?a=" + current_chat;
+
+    fetch(url)
+      .then(res => res.json())
+      .then(res => {
+        let responseData = res;
+        let messages = responseData.chat_messages;
+        let chat_id = responseData.chat_id;
+
+        this.setState({
+          chat_key: chat_id,
+          chats: messages
+        });
+        console.log(this.state.chat_key);
+        this.subscribeChannel(this.state.chat_key);
+      });
+  };
+
+  clearChat = () => {
+    this.setState({
+      chats: []
+    });
+  };
 
   componentDidMount() {
+    this.clearChat();
+    this.getChat(this.props.id, this.props.current_chat);
+    this.scrollToBot();
+  }
+
+  componentWillReceiveProps(nextProps) {
+    console.log(nextProps.current_chat);
+    this.clearChat();
+    this.getChat(nextProps.id, nextProps.current_chat);
     this.scrollToBot();
   }
 
@@ -65,7 +109,8 @@ class Chatroom extends React.Component {
       let username = this.props.username;
       let message = {
         content,
-        username
+        username,
+        chat: this.state.chat_key
       };
 
       fetch("http://localhost:3000/messages", {
@@ -75,7 +120,7 @@ class Chatroom extends React.Component {
         },
         method: "POST",
         body: JSON.stringify(message)
-      }).then(res => console.log(res));
+      });
       this.clearMessage();
     }
   }
@@ -93,7 +138,7 @@ class Chatroom extends React.Component {
 
     return (
       <div className="chatroom">
-        <h3>Gravim8</h3>
+        <h3>{this.props.current_chat}</h3>
         <ul className="chats" ref="chats">
           {chatsonpage}
         </ul>
@@ -107,7 +152,8 @@ class Chatroom extends React.Component {
 }
 
 const mapStateToProps = state => ({
-  username: state.auth.currentUser.username
+  username: state.auth.currentUser.username,
+  id: state.auth.currentUser.id
 });
 
 export default withAuth(connect(mapStateToProps, actions)(Chatroom));

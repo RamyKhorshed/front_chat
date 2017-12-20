@@ -24,7 +24,6 @@ class Login extends React.Component {
     e.preventDefault();
     const { fields: { username, password } } = this.state;
     this.props.loginUser(username, password, this.props.history);
-    debugger;
   };
 
   render() {
