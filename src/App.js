@@ -3,10 +3,8 @@ import { Link, Switch, Route } from "react-router-dom";
 import { connect } from "react-redux";
 import Login from "./Login";
 import Chatlist from "./Chatlist";
-import Chatroom from "./Chatroom";
-import withAuth from "./hocs/withAuth";
 import * as actions from "./actions";
-import { Input, Menu, Button } from "semantic-ui-react";
+import { Menu, Button } from "semantic-ui-react";
 
 class App extends Component {
   render() {
@@ -35,7 +33,7 @@ class App extends Component {
             </Menu.Item>
             <Menu.Item>
               {this.props.loggedIn ? (
-                <Link to={"/chatroom/" + this.props.username}>
+                <Link to={"/chatroom"}>
                   <Button>Go to Chat</Button>
                 </Link>
               ) : null}
@@ -45,10 +43,7 @@ class App extends Component {
         <div className="App">
           <Switch>
             <Route path="/login" component={Login} />
-            <Route
-              path={"/chatroom/" + this.props.username}
-              component={Chatlist}
-            />
+            <Route path={"/chatroom"} component={Chatlist} />
           </Switch>
         </div>
       </div>

@@ -2,9 +2,9 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { connect } from "react-redux";
 import * as actions from "./actions";
+import { Grid, Segment, Progress, Statistic } from "semantic-ui-react";
 import "./App.css";
 import ActionCable from "actioncable";
-import withAuth from "./hocs/withAuth";
 
 import Message from "./Message.js";
 
@@ -15,16 +15,14 @@ class Chatroom extends React.Component {
     this.state = {
       username: this.props.username,
       chat_key: 1,
-      chats: [
-        {
-          username: "Kevin Hsu",
-          content: <p>Hello World!</p>,
-          img: "http://i.imgur.com/Tj5DGiO.jpg"
-        }
-      ],
-      channelCable: {}
+      chats: [],
+      channelCable: {},
+      friend_sentiment: 0,
+      friend_sentiment: 0,
+      my_sentiment: 0,
+      friend_sentiment_overall: 0,
+      my_sentiment_overall: 0
     };
-    this.submitMessage = this.submitMessage.bind(this);
   }
 
   subscribeChannel = key => {
@@ -33,16 +31,33 @@ class Chatroom extends React.Component {
       { channel: "RoomChannel", chat_key: key },
       {
         received: data => {
-          this.setState({
-            chats: [
-              ...this.state.chats,
-              {
-                username: data.username,
-                content: data.content,
-                messagescore: data.messagescore
-              }
-            ]
-          });
+          if (this.state.username == data.username) {
+            this.setState({
+              chats: [
+                ...this.state.chats,
+                {
+                  username: data.username,
+                  content: data.content,
+                  messagescore: data.messagescore
+                }
+              ],
+              my_sentiment: data.my_sentiment_this_chat,
+              my_sentiment_overall: data.my_sentiment_overall
+            });
+          } else {
+            this.setState({
+              chats: [
+                ...this.state.chats,
+                {
+                  username: data.username,
+                  content: data.content,
+                  messagescore: data.messagescore
+                }
+              ],
+              friend_sentiment: data.my_sentiment_this_chat,
+              friend_sentiment_overall: data.my_sentiment_overall
+            });
+          }
         }
       }
     );
@@ -58,16 +73,17 @@ class Chatroom extends React.Component {
 
     fetch(url)
       .then(res => res.json())
-      .then(res => {
-        let responseData = res;
-        let messages = responseData.chat_messages;
-        let chat_id = responseData.chat_id;
-
+      .then(response => {
+        let messages = response.chat_messages;
+        let chat_id = response.chat_id;
         this.setState({
           chat_key: chat_id,
-          chats: messages
+          chats: messages,
+          friend_sentiment: response.friend_sentiment_this_chat,
+          my_sentiment: response.my_sentiment_this_chat,
+          friend_sentiment_overall: response.friend_sentiment_overall,
+          my_sentiment_overall: response.my_sentiment_overall
         });
-        console.log(this.state.chat_key);
         this.subscribeChannel(this.state.chat_key);
       });
   };
@@ -89,6 +105,7 @@ class Chatroom extends React.Component {
     this.clearChat();
     this.getChat(nextProps.id, nextProps.current_chat);
     this.scrollToBot();
+    this.state.channelCable.unsubscribe();
   }
 
   componentDidUpdate() {
@@ -101,7 +118,7 @@ class Chatroom extends React.Component {
     ).scrollHeight;
   }
 
-  submitMessage(e) {
+  submitMessage = e => {
     e.preventDefault();
 
     let content = ReactDOM.findDOMNode(this.refs.msg).value;
@@ -123,7 +140,7 @@ class Chatroom extends React.Component {
       });
       this.clearMessage();
     }
-  }
+  };
 
   clearMessage() {
     ReactDOM.findDOMNode(this.refs.msg).value = "";
@@ -137,16 +154,93 @@ class Chatroom extends React.Component {
     ));
 
     return (
-      <div className="chatroom">
-        <h3>{this.props.current_chat}</h3>
-        <ul className="chats" ref="chats">
-          {chatsonpage}
-        </ul>
-        <form className="input" onSubmit={e => this.submitMessage(e)}>
-          <input type="text" ref="msg" />
-          <input type="submit" value="Submit" />
-        </form>
-      </div>
+      <Grid.Row>
+        <Grid.Column width={8}>
+          <div className="chatroom">
+            <h3>{this.props.current_chat}</h3>
+            <ul className="chats" ref="chats">
+              {chatsonpage}
+            </ul>
+            <form className="input" onSubmit={e => this.submitMessage(e)}>
+              <input type="text" ref="msg" />
+              <input type="submit" value="Submit" />
+            </form>
+          </div>
+        </Grid.Column>
+        <Grid.Column width={6}>
+          <Segment>
+            <h1>Statistics</h1>
+            <h2>{this.props.current_chat}'s Sentiment:</h2>
+            <ul>
+              <li>
+                This Conversation:
+                <Progress
+                  percent={this.state.friend_sentiment * 100}
+                  indicating
+                />
+              </li>
+              <li>
+                Overall:
+                <Progress
+                  percent={this.state.friend_sentiment_overall * 100}
+                  indicating
+                />
+              </li>
+              <li>
+                <Statistic
+                  color={
+                    this.state.friend_sentiment >
+                    this.state.friend_sentiment_overall
+                      ? "green"
+                      : "red"
+                  }
+                >
+                  <Statistic.Value>
+                    {(
+                      (this.state.friend_sentiment -
+                        this.state.friend_sentiment_overall) *
+                      10
+                    ).toFixed(2)}
+                  </Statistic.Value>
+                  <Statistic.Label>Conversation Score</Statistic.Label>
+                </Statistic>
+              </li>
+            </ul>
+            <h2>{username}'s Sentiment:</h2>
+            <ul>
+              <li>
+                This Conversation:
+                <Progress percent={this.state.my_sentiment * 100} indicating />
+              </li>
+              <li>
+                Overall:
+                <Progress
+                  percent={this.state.my_sentiment_overall * 100}
+                  indicating
+                />
+              </li>
+              <li>
+                <Statistic
+                  color={
+                    this.state.my_sentiment > this.state.my_sentiment_overall
+                      ? "green"
+                      : "red"
+                  }
+                >
+                  <Statistic.Value>
+                    {(
+                      (this.state.my_sentiment -
+                        this.state.my_sentiment_overall) *
+                      10
+                    ).toFixed(2)}
+                  </Statistic.Value>
+                  <Statistic.Label>Conversation Score</Statistic.Label>
+                </Statistic>
+              </li>
+            </ul>
+          </Segment>
+        </Grid.Column>
+      </Grid.Row>
     );
   }
 }
@@ -156,4 +250,4 @@ const mapStateToProps = state => ({
   id: state.auth.currentUser.id
 });
 
-export default withAuth(connect(mapStateToProps, actions)(Chatroom));
+export default connect(mapStateToProps, actions)(Chatroom);

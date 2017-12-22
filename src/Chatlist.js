@@ -1,13 +1,11 @@
 import React, { Component } from "react";
-import { Link, Switch, Route } from "react-router-dom";
 import { connect } from "react-redux";
-import Login from "./Login";
 import Chatroom from "./Chatroom";
 import * as actions from "./actions";
-import { Input, Menu, Button, Segment } from "semantic-ui-react";
+import { Grid, Button, Segment } from "semantic-ui-react";
 import withAuth from "./hocs/withAuth";
 
-class Chatlist extends React.Component {
+class Chatlist extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -21,10 +19,9 @@ class Chatlist extends React.Component {
 
   componentDidMount() {
     let id = this.state.id;
-    fetch("http://localhost:3000/api/v1/users/{id}")
+    fetch("http://localhost:3000/api/v1/users/" + id)
       .then(res => res.json())
-      .then(res => this.setState({ chats: res.chats, users: res.users }))
-      .then(res => console.log(this.state));
+      .then(res => this.setState({ chats: res.chats, users: res.users }));
   }
 
   goToUser = e => {
@@ -41,33 +38,26 @@ class Chatlist extends React.Component {
       </Button>
     ));
 
-    const existingChats = this.state.chats.map(chat => (
-      <Button onClick={e => this.goToChat(e)} value={chat.name}>
-        {chat.name}
-      </Button>
-    ));
-
     return (
-      <div>
-        <Segment>
-          <h1>Start a chat with a User from the list below:</h1>
-          {allUsers}
-          {/* <h1>Or Continue an existing Chat:</h1>
-          {existingChats} */}
-        </Segment>
+      <Grid>
+        <Grid.Row>
+          <Segment>
+            <h2>Welcome, {this.props.username}!</h2>
+            {allUsers}
+          </Segment>
+        </Grid.Row>
         {this.state.current_chat ? (
-          <div>
-            <Chatroom current_chat={this.state.current_chat} />
-          </div>
+          <Chatroom current_chat={this.state.current_chat} />
         ) : null}
-      </div>
+      </Grid>
     );
   }
 }
 
 const mapStateToProps = state => ({
+  loggedIn: !!state.auth.currentUser.id,
   username: state.auth.currentUser.username,
   id: state.auth.currentUser.id
 });
 
-export default connect(mapStateToProps, actions)(Chatlist);
+export default withAuth(connect(mapStateToProps, actions)(Chatlist));

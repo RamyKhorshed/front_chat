@@ -1,24 +1,60 @@
 import React, { Component } from "react";
-import ActionCable from "actioncable";
+import ReactDOM from "react-dom";
+import { connect } from "react-redux";
+import Chatroom from "./Chatroom";
+import * as actions from "./actions";
+import { Grid, Button, Segment } from "semantic-ui-react";
+import Message from "./Message.js";
 
 class Chat extends Component {
-  constructor(props) {
-    super(props);
-    this.subscribeChannel();
+  clearMessage() {
+    ReactDOM.findDOMNode(this.refs.msg).value = "";
   }
 
-  subscribeChannel() {
-    const cable = ActionCable.createConsumer("ws://localhost:3000/cable");
-    cable.subscriptions.create("RoomChannel", {
-      received: data => {
-        console.log("Receiving Data:", data);
-      }
+  clearChat = () => {
+    this.setState({
+      chats: []
     });
+  };
+
+  componentDidMount() {
+    this.clearChat();
+    this.scrollToBot();
+  }
+
+  componentWillReceiveProps(nextProps) {
+    this.clearChat();
+    this.scrollToBot();
+  }
+
+  componentDidUpdate() {
+    this.scrollToBot();
+  }
+
+  scrollToBot() {
+    ReactDOM.findDOMNode(this.refs.chats).scrollTop = ReactDOM.findDOMNode(
+      this.refs.chats
+    ).scrollHeight;
   }
 
   render() {
-    return <div>Chat</div>;
+    let chatsonpage = this.props.chat.map(chat => (
+      <Message chat={chat} user={this.props.username} />
+    ));
+
+    return (
+      <div className="chatroom">
+        <h3>{this.props.current_chat}</h3>
+        <ul className="chats" ref="chats">
+          {chatsonpage}
+        </ul>
+        <form className="input" onSubmit={e => this.props.submitMessage(e)}>
+          <input type="text" ref="msg" />
+          <input type="submit" value="Submit" />
+        </form>
+      </div>
+    );
   }
 }
 
-export default Chat;
+export default connect(null, actions)(Chat);

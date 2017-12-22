@@ -69,7 +69,6 @@ p {
   font-size: 14px;
   border-radius: 10px;
   list-style: none;
-  float: left;
   clear: both;
   margin: 10px 0;
   max-width: 200px;
@@ -133,4 +132,8 @@ p {
   background: #1ee494;
   color: #fff;
 }
-/*# sourceMappingURL=main.b5d0bdf9.css.map*/
+
+ul {
+  list-style-type: none;
+}
+
