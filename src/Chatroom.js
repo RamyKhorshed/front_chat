@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { connect } from "react-redux";
 import * as actions from "./actions";
-import { Grid, Segment, Progress, Statistic } from "semantic-ui-react";
+import { Grid, Segment, Progress, Statistic, Button } from "semantic-ui-react";
 import "./App.css";
 import ActionCable from "actioncable";
 
@@ -117,6 +117,18 @@ class Chatroom extends React.Component {
       this.refs.chats
     ).scrollHeight;
   }
+
+  analyze = () => {
+    let current_chat = this.props.current_chat;
+    let id = this.props.id;
+    let url = "http://localhost:3000/api/v1/watson_insights/" + current_chat;
+    fetch(url, {
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json"
+      }
+    });
+  };
 
   submitMessage = e => {
     e.preventDefault();
@@ -239,6 +251,7 @@ class Chatroom extends React.Component {
               </li>
             </ul>
           </Segment>
+          <Button onClick={this.analyze}>Analyze</Button>
         </Grid.Column>
       </Grid.Row>
     );
