@@ -7,6 +7,7 @@ import "./App.css";
 import ActionCable from "actioncable";
 
 import Message from "./Message.js";
+import PersonalityChart from "./PersonalityChart.js";
 
 class Chatroom extends React.Component {
   constructor(props) {
@@ -21,7 +22,8 @@ class Chatroom extends React.Component {
       friend_sentiment: 0,
       my_sentiment: 0,
       friend_sentiment_overall: 0,
-      my_sentiment_overall: 0
+      my_sentiment_overall: 0,
+      chart: false
     };
   }
 
@@ -118,15 +120,9 @@ class Chatroom extends React.Component {
     ).scrollHeight;
   }
 
-  analyze = () => {
-    let current_chat = this.props.current_chat;
-    let id = this.props.id;
-    let url = "http://localhost:3000/api/v1/watson_insights/" + current_chat;
-    fetch(url, {
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json"
-      }
+  toggleChart = () => {
+    this.setState({
+      chart: true
     });
   };
 
@@ -181,6 +177,11 @@ class Chatroom extends React.Component {
         </Grid.Column>
         <Grid.Column width={6}>
           <Segment>
+            <h1>Watson Personality Insights</h1>
+            <Button onClick={this.toggleChart}>Analyze</Button>
+            {this.state.chart ? (
+              <PersonalityChart current_chat={this.props.current_chat} />
+            ) : null}
             <h1>Statistics</h1>
             <h2>{this.props.current_chat}'s Sentiment:</h2>
             <ul>
@@ -251,7 +252,6 @@ class Chatroom extends React.Component {
               </li>
             </ul>
           </Segment>
-          <Button onClick={this.analyze}>Analyze</Button>
         </Grid.Column>
       </Grid.Row>
     );
