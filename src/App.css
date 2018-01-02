@@ -20,19 +20,58 @@ p {
 p {
   display: inline-block;
 }
+.container {
+  background-color: #fff;
+  max-height: 100%;
+  max-width: 100%;
+  display: flex; /*added*/
+  flex-direction: column; /*added*/
+}
 .App {
-  background-color: #1ee494;
-  height: 100vh;
-  width: 100vw;
   display: -ms-flexbox;
   display: flex;
   -ms-flex-align: center;
   align-items: center;
   -ms-flex-pack: center;
   justify-content: center;
+  padding: 15px;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+  flex: 1; /* added */
+}
+.chatlist {
+  position: fixed;
+  width: 200px;
+  max-height: 500px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  flex: 1;
+  display: inline-block;
+  padding: 10px;
+}
+.chat-title {
+  position: fixed;
+}
+
+.right-display {
+  margin-left: 200px;
+  width: 100%;
+  display: inline-block;
+}
+
+.stats {
+  padding: 10px;
+  float: left;
+  display: inline-block;
+  width: 50%;
+  text-align: center;
 }
 .chatroom {
-  width: 360px;
+  float: left;
+  max-width: 50%;
+  display: inline-block;
+  min-width: 250px;
   height: 600px;
   background-color: rgba(0, 0, 0, 0.7);
   border-radius: 5px;
@@ -40,9 +79,10 @@ p {
   -webkit-box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.3);
   box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.3);
 }
+
 .chatroom h3 {
   font-family: Oxygen, cursive;
-  background-color: rgba(30, 228, 148, 0.7);
+  background-color: #0075ea;
   color: #fff;
   margin: 0;
   height: 40px;
@@ -92,7 +132,7 @@ p {
 .chatroom .input {
   height: 40px;
   width: 100%;
-  background: rgba(30, 228, 148, 0.7);
+  background: #0075ea;
   display: -ms-flexbox;
   display: flex;
   -ms-flex-direction: row;
@@ -103,7 +143,7 @@ p {
 .chatroom .input input[type="text"] {
   background: hsla(0, 0%, 100%, 0.5);
   outline: 0;
-  border: 2px solid #1ee494;
+  border: 2px solid #fff;
   padding: 0 5px;
   border-top-left-radius: 5px;
   border-bottom-left-radius: 5px;
@@ -119,7 +159,7 @@ p {
 }
 .chatroom .input input[type="submit"] {
   background: transparent;
-  border: 1px solid #1ee494;
+  border: 1px solid #fff;
   width: 70px;
   border-top-right-radius: 5px;
   border-bottom-right-radius: 5px;
@@ -136,4 +176,3 @@ p {
 ul {
   list-style-type: none;
 }
-

@@ -1,6 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
-import { withRouter } from "react-router-dom";
+import { Link, withRouter } from "react-router-dom";
 import * as actions from "./actions";
 
 class Login extends React.Component {
@@ -57,6 +57,9 @@ class Login extends React.Component {
             </button>
           </form>
         </div>
+        <Link to="/user/new">
+          <div className="ui basic blue button">Create New User</div>
+        </Link>
       </div>
     );
   }

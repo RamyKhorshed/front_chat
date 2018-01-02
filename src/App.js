@@ -5,16 +5,21 @@ import Login from "./Login";
 import Chatlist from "./Chatlist";
 import * as actions from "./actions";
 import { Menu, Button } from "semantic-ui-react";
+import NewUser from "./NewUser";
 
 class App extends Component {
   render() {
     return (
-      <div>
+      <div className="container">
         <Menu>
           <Menu.Item>
             <h1>Welcome to Gravim8</h1>
           </Menu.Item>
           <Menu.Menu position="right">
+            <Menu.Item>
+              <Link to="/Results">Interpreting Results</Link>
+            </Menu.Item>
+
             <Menu.Item>
               {this.props.loggedIn ? (
                 <a
@@ -43,7 +48,12 @@ class App extends Component {
         <div className="App">
           <Switch>
             <Route path="/login" component={Login} />
+            <Route path="/Results" component={Login} />
             <Route path={"/chatroom"} component={Chatlist} />
+            <Route
+              path="/user/new"
+              render={props => <NewUser {...props} handleLogin={this.login} />}
+            />
           </Switch>
         </div>
       </div>

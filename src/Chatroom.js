@@ -2,10 +2,11 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { connect } from "react-redux";
 import * as actions from "./actions";
-import { Grid, Segment, Progress, Statistic, Button } from "semantic-ui-react";
+import { Segment, Progress, Statistic, Button } from "semantic-ui-react";
 import "./App.css";
 import ActionCable from "actioncable";
 
+import Stats from "./Stats.js";
 import Message from "./Message.js";
 import PersonalityChart from "./PersonalityChart.js";
 
@@ -19,10 +20,10 @@ class Chatroom extends React.Component {
       chats: [],
       channelCable: {},
       friend_sentiment: 0,
-      friend_sentiment: 0,
       my_sentiment: 0,
       friend_sentiment_overall: 0,
       my_sentiment_overall: 0,
+      word_count: 0,
       chart: false
     };
   }
@@ -57,7 +58,8 @@ class Chatroom extends React.Component {
                 }
               ],
               friend_sentiment: data.my_sentiment_this_chat,
-              friend_sentiment_overall: data.my_sentiment_overall
+              friend_sentiment_overall: data.my_sentiment_overall,
+              word_count: data.word_count
             });
           }
         }
@@ -84,7 +86,8 @@ class Chatroom extends React.Component {
           friend_sentiment: response.friend_sentiment_this_chat,
           my_sentiment: response.my_sentiment_this_chat,
           friend_sentiment_overall: response.friend_sentiment_overall,
-          my_sentiment_overall: response.my_sentiment_overall
+          my_sentiment_overall: response.my_sentiment_overall,
+          word_count: response.word_count
         });
         this.subscribeChannel(this.state.chat_key);
       });
@@ -105,6 +108,7 @@ class Chatroom extends React.Component {
   componentWillReceiveProps(nextProps) {
     console.log(nextProps.current_chat);
     this.clearChat();
+    this.clearChart();
     this.getChat(nextProps.id, nextProps.current_chat);
     this.scrollToBot();
     this.state.channelCable.unsubscribe();
@@ -122,7 +126,13 @@ class Chatroom extends React.Component {
 
   toggleChart = () => {
     this.setState({
-      chart: true
+      chart: !this.state.chart
+    });
+  };
+
+  clearChart = () => {
+    this.setState({
+      chart: false
     });
   };
 
@@ -162,98 +172,29 @@ class Chatroom extends React.Component {
     ));
 
     return (
-      <Grid.Row>
-        <Grid.Column width={8}>
-          <div className="chatroom">
-            <h3>{this.props.current_chat}</h3>
-            <ul className="chats" ref="chats">
-              {chatsonpage}
-            </ul>
-            <form className="input" onSubmit={e => this.submitMessage(e)}>
-              <input type="text" ref="msg" />
-              <input type="submit" value="Submit" />
-            </form>
-          </div>
-        </Grid.Column>
-        <Grid.Column width={6}>
-          <Segment>
-            <h1>Watson Personality Insights</h1>
-            <Button onClick={this.toggleChart}>Analyze</Button>
-            {this.state.chart ? (
-              <PersonalityChart current_chat={this.props.current_chat} />
-            ) : null}
-            <h1>Statistics</h1>
-            <h2>{this.props.current_chat}'s Sentiment:</h2>
-            <ul>
-              <li>
-                This Conversation:
-                <Progress
-                  percent={this.state.friend_sentiment * 100}
-                  indicating
-                />
-              </li>
-              <li>
-                Overall:
-                <Progress
-                  percent={this.state.friend_sentiment_overall * 100}
-                  indicating
-                />
-              </li>
-              <li>
-                <Statistic
-                  color={
-                    this.state.friend_sentiment >
-                    this.state.friend_sentiment_overall
-                      ? "green"
-                      : "red"
-                  }
-                >
-                  <Statistic.Value>
-                    {(
-                      (this.state.friend_sentiment -
-                        this.state.friend_sentiment_overall) *
-                      10
-                    ).toFixed(2)}
-                  </Statistic.Value>
-                  <Statistic.Label>Conversation Score</Statistic.Label>
-                </Statistic>
-              </li>
-            </ul>
-            <h2>{username}'s Sentiment:</h2>
-            <ul>
-              <li>
-                This Conversation:
-                <Progress percent={this.state.my_sentiment * 100} indicating />
-              </li>
-              <li>
-                Overall:
-                <Progress
-                  percent={this.state.my_sentiment_overall * 100}
-                  indicating
-                />
-              </li>
-              <li>
-                <Statistic
-                  color={
-                    this.state.my_sentiment > this.state.my_sentiment_overall
-                      ? "green"
-                      : "red"
-                  }
-                >
-                  <Statistic.Value>
-                    {(
-                      (this.state.my_sentiment -
-                        this.state.my_sentiment_overall) *
-                      10
-                    ).toFixed(2)}
-                  </Statistic.Value>
-                  <Statistic.Label>Conversation Score</Statistic.Label>
-                </Statistic>
-              </li>
-            </ul>
-          </Segment>
-        </Grid.Column>
-      </Grid.Row>
+      <div>
+        <div className="chatroom">
+          <h3>{this.props.current_chat}</h3>
+          <ul className="chats" ref="chats">
+            {chatsonpage}
+          </ul>
+          <form className="input" onSubmit={e => this.submitMessage(e)}>
+            <input type="text" ref="msg" />
+            <input type="submit" value="Submit" />
+          </form>
+        </div>
+
+        <Stats
+          current_chat={this.props.current_chat}
+          friend_sentiment={this.state.friend_sentiment}
+          my_sentiment={this.state.my_sentiment}
+          friend_sentiment_overall={this.state.friend_sentiment_overall}
+          my_sentiment_overall={this.state.my_sentiment_overall}
+          toggleChart={this.toggleChart}
+          chart={this.state.chart}
+          word_count={this.state.word_count}
+        />
+      </div>
     );
   }
 }
