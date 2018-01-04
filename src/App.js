@@ -6,18 +6,30 @@ import Chatlist from "./Chatlist";
 import * as actions from "./actions";
 import { Menu, Button } from "semantic-ui-react";
 import NewUser from "./NewUser";
+import Homepage from "./Homepage";
 
 class App extends Component {
   render() {
     return (
       <div className="container">
-        <Menu>
+        <Menu className="menu">
           <Menu.Item>
-            <h1>Welcome to Gravim8</h1>
+            <Link to={"/"}>
+              <img
+                src="./images/chat.png"
+                style={{
+                  width: "30px",
+                  height: "30px",
+                  display: "inline-block"
+                }}
+              />
+            </Link>
+
+            <h1>Chatalyzer</h1>
           </Menu.Item>
           <Menu.Menu position="right">
             <Menu.Item>
-              <Link to="/Results">Interpreting Results</Link>
+              <a href="/Login">Interpreting Results</a>
             </Menu.Item>
 
             <Menu.Item>
@@ -31,25 +43,17 @@ class App extends Component {
                   Sign Out
                 </a>
               ) : (
-                <Link to="/login">
-                  <Button>Go to Login</Button>
-                </Link>
+                <Link to="/login">Go to Login</Link>
               )}
-            </Menu.Item>
-            <Menu.Item>
-              {this.props.loggedIn ? (
-                <Link to={"/chatroom"}>
-                  <Button>Go to Chat</Button>
-                </Link>
-              ) : null}
             </Menu.Item>
           </Menu.Menu>
         </Menu>
         <div className="App">
           <Switch>
+            <Route exact path="/" component={Homepage} />
             <Route path="/login" component={Login} />
             <Route path="/Results" component={Login} />
-            <Route path={"/chatroom"} component={Chatlist} />
+            <Route path="/chatroom" component={Chatlist} />
             <Route
               path="/user/new"
               render={props => <NewUser {...props} handleLogin={this.login} />}

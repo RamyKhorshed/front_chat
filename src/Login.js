@@ -29,7 +29,7 @@ class Login extends React.Component {
   render() {
     const { fields } = this.state;
     return (
-      <div>
+      <div className="login">
         {this.state.error ? <h1>Try Again</h1> : null}
         <div className="ui form">
           <form onSubmit={this.handleSubmit}>
